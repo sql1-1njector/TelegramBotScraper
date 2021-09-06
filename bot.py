@@ -39,11 +39,6 @@ db = client.credit_cards
 
 developers = ['878216403']
 
-people = [
-  "1767091122",
-  "1079834502",
-  "878216403",
-]
 
 addusr = ""
 tk = os.getenv("TOKEN")
