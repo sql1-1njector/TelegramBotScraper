@@ -11,7 +11,6 @@ from luhn import *
 from telegram.ext.dispatcher import run_async
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
-bot_token = input('BOT TOKEN: ')
 posting_channel = input("CHAT ID TO POST CCS: ")
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -59,14 +58,7 @@ class DB_Connection:
 			print(str(e))
 			return False
 
-'''
-Join To all our networks:
-
-	- @EvilSofiaAI - BOG AI PUBLIC LOGS
-	- @CC_SNIFF_DB - The more biggest & fast cc posting group
-	- @CCDataBaseBot - The most powerful bin checker & provieded bot.
-'''
-
+developers = ['878216403']
 
 
 @run_async
@@ -90,9 +82,9 @@ def extrct(update, context):
 	
 
 			card_beautiful_send = f'''
-CC: <code>{check_card_bog_network["cc"]}</code>
+CC: {check_card_bog_network["cc"]}
 
-⚠️<b>All Our Automate Network has powered by EvilSofiaAI</b>
+⚠️All Our Automate Network has powered by @EvilSofiaAI
 					'''
 			context.bot.send_message(
 				chat_id=posting_channel,
@@ -104,8 +96,9 @@ CC: <code>{check_card_bog_network["cc"]}</code>
 
 def main():
 
-
-	updater = Updater(bot_token, use_context=True)
+	tk = '' #Put here ur bot token 
+	
+	updater = Updater(tk, use_context=True)
 	dp = updater.dispatcher
 
 	dp.add_handler(MessageHandler(Filters.text, extrct))
