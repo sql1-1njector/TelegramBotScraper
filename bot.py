@@ -60,11 +60,6 @@ class DB_Connection:
 
 developers = ['878216403']
 
-
-@run_async
-def start(update):
-	update.message.reply_text("This CC Scraper has been started successfully | Developed by [𝕭𝖔𝕲] Emilio")
-
 @run_async
 def extrct(update, context):
 	
