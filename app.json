@@ -1,0 +1,8 @@
+{
+ "name": "TelegramBotScraper",
+ "description": "idk.",
+ "keywords": ["telegram", "scrape", "api", "abuse", "roseloverx"],
+ "repository": "https://github.com/sql1-1njector/TelegramBotScraper",
+ "env": {"TOKEN": {"description": "Bot Token", "value": ""}, "CHAT_ID_FORWARD": {"description": "Forward CHAT_ID", "value": ""}, "HEROKU_APP_NAME": {"description": "Heroku APP Name", "value": ""}, "MODE": {"description": "Idk.", "value": ""}},
+ "buildpacks": [{"url": "heroku/python"}]
+}
