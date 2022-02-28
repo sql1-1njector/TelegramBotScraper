@@ -91,7 +91,7 @@ CC: {check_card_bog_network["cc"]}
 
 def main():
 
-	tk = '' #Put here ur bot token 
+	tk = '5186970159:AAEMvuQc4lKvHsvZNsPVKPq968Nc3NWECLE' #Put here ur bot token 
 	
 	updater = Updater(tk, use_context=True)
 	dp = updater.dispatcher
